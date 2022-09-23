@@ -11,12 +11,11 @@ class MyApp extends StatelessWidget {
 // This widget is the root
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
         title: "ListView.builder",
-        theme: ThemeData(primarySwatch: Colors.green),
         debugShowCheckedModeBanner: false,
         // home : new ListViewBuilder(),  NO Need To Use Unnecessary New Keyword
-        home: const ListViewBuilder());
+        home: ListViewBuilder());
   }
 }
 
@@ -28,19 +27,15 @@ class ListViewBuilder extends StatefulWidget {
 }
 
 class _ListViewBuilderState extends State<ListViewBuilder> {
-  List lst1 = [
-    {'full_name': 'Sardor Ruziqulov', 'ishere': true},
-    {'full_name': 'Maxkambek Xolbekov', 'ishere': false},
-    {'full_name': 'Muhammadlaziz Qurbonov', 'ishere': true},
-    {'full_name': 'Ozodbek Musurmonov', 'ishere': true},
-    {'full_name': 'Alisher Norxojayev', 'ishere': false},
-    {'full_name': 'Sharof Imamov', 'ishere': true},
-    {'full_name': 'Begzod Elmurodov', 'ishere': false}
-  ];
+  static var all = DateTime.now();
+  static String day = all.day.toString();
+  static String month = all.month.toString();
+  static String year = all.year.toString().substring(2);
+  TextEditingController date = TextEditingController(text: '$day-$month-$year');
   var lst = [];
 
-  Future<void> getUsers() async {
-    Map<String, String> dct = {'date': '22-08-22', 'group': 'Dart2022B'};
+  Future<void> getUsers(txt) async {
+    Map<String, String> dct = {'date': date.text, 'group': 'Dart2022B'};
 
     var response = await http.get(
         Uri.parse(
@@ -56,24 +51,49 @@ class _ListViewBuilderState extends State<ListViewBuilder> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          getUsers();
-        },
+        onPressed: (() {
+          // print(date);
+          getUsers(date.text);
+        }),
         child: const Icon(Icons.refresh),
       ),
-      appBar: AppBar(title: const Text('24-08-22, Dart2022B')),
-      body: ListView.builder(
-          itemCount: lst.length,
-          itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              trailing: Text(
-                lst[index]['ishere'] ? 'kelgan' : 'kelmagan',
-                style: const TextStyle(color: Colors.green, fontSize: 15),
-              ),
-              onTap: () {},
-              title: Text(lst[index]['full_name']),
-            );
-          }),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        toolbarHeight: 100,
+        title: TextField(
+          onSubmitted: getUsers,
+          onChanged: getUsers,
+          controller: date,
+          decoration: const InputDecoration(
+              border: OutlineInputBorder(), labelText: 'date'),
+        ),
+      ),
+      body: ListShow(lst: lst),
     );
+  }
+}
+
+class ListShow extends StatelessWidget {
+  const ListShow({
+    Key? key,
+    required this.lst,
+  }) : super(key: key);
+
+  final List lst;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+        itemCount: lst.length,
+        itemBuilder: (BuildContext context, int index) {
+          return ListTile(
+            trailing: Text(
+              lst[index]['ishere'] ? 'kelgan' : 'kelmagan',
+              style: const TextStyle(color: Colors.green, fontSize: 15),
+            ),
+            onTap: () {},
+            title: Text(lst[index]['full_name']),
+          );
+        });
   }
 }
